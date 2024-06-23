@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uml:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
+  <packagedElement xmi:type="uml:Class" name="Studente">
+    <ownedAttribute xmi:type="uml:Property" name="nome" visibility="private" type="//String"/>
+    <ownedAttribute xmi:type="uml:Property" name="cognome" type="//String"/>
+    <ownedAttribute xmi:type="uml:Property" name="email" type="//String"/>
+    <ownedOperation xmi:type="uml:Operation" name="iscriversiAlCorso">
+      <ownedParameter xmi:type="uml:Parameter" name="corso\" type="//Corso"/>
+    </ownedOperation>
+    <ownedOperation xmi:type="uml:Operation" name="prelevaVoti">
+      <ownedParameter xmi:type="uml:Parameter" name="voti" direction="out"/>
+    </ownedOperation>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" name="Corso">
+    <ownedAttribute xmi:type="uml:Property" name="nomeCorso" visibility="private" type="//String"/>
+    <ownedAttribute xmi:type="uml:Property" name="codiceCorso" type="//String"/>
+    <ownedAttribute xmi:type="uml:Property" name="docente" type="//String"/>
+    <ownedAttribute xmi:type="uml:Property" name="crediti" type="//Integer"/>
+    <ownedOperation xmi:type="uml:Operation" name="registraStudente">
+      <ownedParameter xmi:type="uml:Parameter" name="studente" type="//Studente"/>
+    </ownedOperation>
+    <ownedOperation xmi:type="uml:Operation" name="assegnaVoti"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:PrimitiveType" name="String"/>
+  <packagedElement xmi:type="uml:Association" name="" memberEnd="//@packagedElement.3/studente">
+    <eAnnotations xmi:type="ecore:EAnnotation" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" name="studente" type="//Studente" association="//@packagedElement.3"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:PrimitiveType" name="Integer"/>
+  <packagedElement xmi:type="uml:Association" name="" memberEnd="//@packagedElement.5/studente //@packagedElement.5/corso" navigableOwnedEnd="//@packagedElement.5/studente //@packagedElement.5/corso">
+    <eAnnotations xmi:type="ecore:EAnnotation" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" name="studente" type="//Studente" association="//@packagedElement.5"/>
+    <ownedEnd xmi:type="uml:Property" name="corso" type="//Corso" association="//@packagedElement.5">
+      <lowerValue xmi:type="uml:LiteralInteger" name="LiteralInteger1"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" name="LiteralUnlimitedNatural1" value="*"/>
+    </ownedEnd>
+  </packagedElement>
+</uml:Model>

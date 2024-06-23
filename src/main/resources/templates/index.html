@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- <html lang="en" xmlns:th="http://www.thymeleaf.org"> -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body>
+    <h1>User List</h1>
+    <!-- Mostra la lista degli utenti solo se l'utente è autenticato -->
+    <!-- <div th:if="${#authorization.expression('isAuthenticated()')}">
+        <ul>
+            <li th:each="assignment : ${assignments}">
+                <p>ID: <span th:text="${assignment.getId()}"></span></p>
+                <p>Project ID: <span th:text="${assignment.getProject_id()}"></span></p>
+                <p>Assignment Text: <span th:text="${assignment.getAssignment_text()}"></span></p>
+            </li>
+        </ul>
+    </div> -->
+    <!-- Mostra il link di accesso solo se l'utente non è autenticato -->
+    <!-- <div th:if="${not #authorization.expression('isAuthenticated()')}">
+        <a th:href="@{/oauth2/authorization/okta}">Log In</a>
+    </div> -->
+    <!-- Mostra il messaggio di benvenuto e il pulsante di logout solo se l'utente è autenticato -->
+    <!-- <div th:if="${#authorization.expression('isAuthenticated()')}">
+        <p>Welcome, <span th:text="${#authentication.principal.attributes['name']}"></span>!</p>
+        <form name="logoutForm" th:action="@{/logout}" method="post">
+            <button type="submit">Log out</button>
+        </form>
+    </div> -->
+</body>
+</html>
