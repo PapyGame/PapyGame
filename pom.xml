@@ -15,8 +15,8 @@
 	<name>PapyGame</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>21</java.version>
-		<project.basedir>C:\Users\loren\Desktop\TIROCINIO\PapyGame</project.basedir>
+		<maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 	</properties>
 	<repositories>
 		<!-- Repository for the JSON Schema Validator -->		
