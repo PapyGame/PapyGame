@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.expression.spel.ast.Assign;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,23 +20,16 @@ import eu.fbk.PapyGame.service.JsonFormatterService;
 import eu.fbk.PapyGame.model.Assignment;
 import eu.fbk.PapyGame.service.AssignmentService;
 import eu.fbk.PapyGame.service.JsonComparisonService;
-import eu.fbk.PapyGame.service.JsonSchemaService;
 import eu.fbk.PapyGame.service.PostgreSqlService;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1")
 public class ApiController {
-    // @Autowired
-    // private JsonFormatterService jsonFormatterService;
-    // @Autowired
-    // private JsonMapperService jsonMapperService;
     @Autowired
     private JsonDiffCheckerService jsonDiffCheckerService;
     @Autowired
     private AssignmentService assignmentService;
-    @Autowired
-    private JsonSchemaService jsonSchemaService;
     @Autowired
     private JsonComparisonService jsonComparisonService;
     @Autowired
@@ -45,12 +37,6 @@ public class ApiController {
     @Autowired
     private PostgreSqlService postgreSqlService;
     
-    // @GetMapping("/prova")
-    // public void prova(@RequestParam String json) {
-    //     json = jsonFormatterService.format(json);
-    //     System.out.println(json);
-    // }
-
     @GetMapping("/assignment")
     public String getAssignment(@RequestParam String project_id) {
         Assignment assignment = assignmentService.getAssignmentByProjectId(project_id);
@@ -65,16 +51,6 @@ public class ApiController {
         // json = jsonFormatterService.format(json);
         // jsonMapperService.jsonMapper(json);
         jsonDiffCheckerService.jsonDiffChecker(json1, json2);
-    }
-
-    @GetMapping("/jsonSchema")
-    public void jsonSchema(@RequestParam String json) {
-        try {
-            String schema = jsonSchemaService.inferSchema(json);
-            System.out.println(schema);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @PostMapping("/compare")
