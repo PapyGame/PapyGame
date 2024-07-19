@@ -23,9 +23,9 @@ public class Assignment {
         return assignment_text;
     }
 
-    public String getAssignment_solution() {
-        return assignment_solution;
-    }
+    // public String getAssignment_solution() {
+    //     return assignment_solution;
+    // }
 
     @Override
     public String toString() {

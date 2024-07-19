@@ -74,14 +74,15 @@ public class ApiController {
     public ResponseEntity<String> getFormattedJson(@RequestParam(name = "user") String user) {
         String projectId;
         switch (user) {
-            case "student":
-                projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
-                break;
+            // case "student":
+            //     projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
+            //     break;
             case "teacher":
-                projectId = "473754eb-ad94-4b3a-bf75-d707a531329e";
+                projectId = "6c3a0179-eda2-4bac-a05d-906d437433f7";
                 break;
             default:
-                throw new IllegalArgumentException("Invalid user type");
+                projectId = user;
+                // throw new IllegalArgumentException("Invalid user type");
         }
 
         String content = postgreSqlService.getContentByProjectId(projectId);
@@ -93,14 +94,15 @@ public class ApiController {
     public ResponseEntity<Map<String, Integer>> getConstraints(@RequestParam(name = "user") String user) {
         String projectId;
         switch (user) {
-            case "student":
-                projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
-                break;
+            // case "student":
+            //     projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
+            //     break;
             case "teacher":
-                projectId = "473754eb-ad94-4b3a-bf75-d707a531329e";
+                projectId = "6c3a0179-eda2-4bac-a05d-906d437433f7";
                 break;
             default:
-                throw new IllegalArgumentException("Invalid user type");
+                projectId = user;
+                // throw new IllegalArgumentException("Invalid user type");
         }
 
         String content = postgreSqlService.getContentByProjectId(projectId);
@@ -122,6 +124,20 @@ public class ApiController {
         String results;
 
         switch (user) {
+            case "41bddc5b-2835-4f2b-a39d-509fe2f2def6":
+                results = "Grade: 9.5 out of 11.0\n" +
+        "Classes\n" +
+        "  - Customer: 2.0 points - Comments: Equivalent to solution class Customer.\n" +
+        "  - Account: 2.0 points - Comments: Equivalent to solution class Account.\n" +
+        "Attributes\n" +
+        "  - Customer.name: 1.0 points - Comments: Equivalent to solution attribute Customer.name.\n" +
+        "  - Account.balance: 1.0 points - Comments: Equivalent to solution attribute Account.balance.\n" +
+        "Associations\n" +
+        "  - Account_Customer: 2.0 points - Comments: Equivalent to solution association Account_Customer.\n" +
+        "Association Ends\n" +
+        "  - Account.owner: 1.0 points - Comments: Equivalent to solution association end Account.owner.\n" +
+        "  - Customer.accounts: 0.5 points - Comments: Equivalent to solution association end Customer.accounts. Wrong lower bound, hence half points.";
+                break;
             case "student":
                 results = "Grade: 22.0 out of 58.0\r\n" + //
                             "Classes\r\n" + //

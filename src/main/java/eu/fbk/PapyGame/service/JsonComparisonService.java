@@ -134,7 +134,7 @@ public class JsonComparisonService {
             }
         }
 
-        counter.put("associations", counter.get("associations")/2);
+        counter.put("associations", counter.get("associations"));
 
         return counter;
     }
