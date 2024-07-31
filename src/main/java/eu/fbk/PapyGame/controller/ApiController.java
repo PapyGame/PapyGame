@@ -51,7 +51,7 @@ public class ApiController {
         if (assignment == null)
             return "No assignment related to this project";
         else 
-            return assignment.getAssignment_text(); 
+            return assignment.getAssignmentText(); 
     }
 
     @GetMapping("/prova2")
@@ -181,7 +181,9 @@ public class ApiController {
     }
 
     @PostMapping("/newBlankProject")
-    public ResponseEntity<String> newBlankProject(@RequestParam(name = "projectName") String projectName) throws Exception {
+    public ResponseEntity<String> newBlankProject(@RequestBody Map<String, String> requestBody) throws Exception {
+        String projectName = (String) requestBody.get("projectName");
+        String assignment_text = (String) requestBody.get("assignment_text");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -264,6 +266,8 @@ public class ApiController {
                                     .getJSONObject("createRepresentation")
                                     .getJSONObject("representation")
                                     .getString("id");
+
+        assignmentService.createAssignment(projectId, assignment_text);
 
         return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId);
     }

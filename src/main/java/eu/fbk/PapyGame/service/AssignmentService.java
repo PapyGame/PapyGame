@@ -6,8 +6,6 @@ import eu.fbk.PapyGame.repository.AssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
 
@@ -17,10 +15,11 @@ public class AssignmentService {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
-    // private static final Logger logger = LoggerFactory.getLogger(AssignmentService.class);
-
-    public List<Assignment> getAllAssignments() {
-        return assignmentRepository.findAll();
+    public void createAssignment(String project_id, String assignment_text) {
+        Assignment assignment = new Assignment();
+        assignment.setProjectId(project_id);
+        assignment.setAssignmentText(assignment_text);
+        assignmentRepository.save(assignment);
     }
 
     public Assignment getAssignmentById(String id) {
