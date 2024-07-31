@@ -2,15 +2,23 @@ package eu.fbk.PapyGame.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -170,6 +178,94 @@ public class ApiController {
                 results = "NO RESULTS FOUND";
         }
         return ResponseEntity.ok(results);
+    }
+
+    @PostMapping("/newBlankProject")
+    public ResponseEntity<String> newBlankProject(@RequestParam(name = "projectName") String projectName) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request;
+        String query;
+        String url = "http://localhost:8080/api/graphql";
+        ResponseEntity<String> response;
+        JSONObject jsonResponse;
+
+        String id = UUID.randomUUID().toString();
+
+        query = "{ \"operationName\": \"createProject\", \"variables\": { \"input\": { \"id\": \"" + id + "\", \"name\": \"" + projectName + "\", \"natures\": [] } }, \"query\": \"mutation createProject($input: CreateProjectInput!) { createProject(input: $input) { __typename ... on CreateProjectSuccessPayload { project { id __typename } __typename } ... on ErrorPayload { message __typename } } }\" }";
+        request = new HttpEntity<>(query, headers);
+        response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        jsonResponse = new JSONObject(response.getBody());
+        String projectId = jsonResponse.getJSONObject("data")
+                                       .getJSONObject("createProject")
+                                       .getJSONObject("project")
+                                       .getString("id");
+
+        query = "{ \"operationName\": \"getStereotypeDescriptions\", \"variables\": { \"editingContextId\": \"" + projectId + "\" }, \"query\": \"query getStereotypeDescriptions($editingContextId: ID!) { viewer { editingContext(editingContextId: $editingContextId) { stereotypeDescriptions { edges { node { id label __typename } __typename } __typename } __typename } __typename } }\" }";
+        request = new HttpEntity<>(query, headers);
+        response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        jsonResponse = new JSONObject(response.getBody());
+        JSONArray edges = jsonResponse.getJSONObject("data")
+                                      .getJSONObject("viewer")
+                                      .getJSONObject("editingContext")
+                                      .getJSONObject("stereotypeDescriptions")
+                                      .getJSONArray("edges");
+
+        String stereotypeDescriptionId = "";
+        for (int i = 0; i < edges.length(); i++) {
+            JSONObject node = edges.getJSONObject(i).getJSONObject("node");
+            if (node.getString("label").equals("UML.uml")) {
+                stereotypeDescriptionId = node.getString("id");
+                break;
+            }
+        }
+
+        String documentId = UUID.randomUUID().toString();
+        query = "{ \"operationName\": \"createDocument\", \"variables\": { \"input\": { \"id\": \"" + documentId + "\", \"editingContextId\": \"" + projectId + "\", \"name\": \"" + projectName + "\", \"stereotypeDescriptionId\": \"" + stereotypeDescriptionId + "\" } }, \"query\": \"mutation createDocument($input: CreateDocumentInput!) { createDocument(input: $input) { __typename ... on ErrorPayload { message __typename } } }\" }";
+        request = new HttpEntity<>(query, headers);
+        response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        String content = postgreSqlService.getContentByProjectId(projectId);
+
+        JSONObject jsonObject = new JSONObject(content);
+        JSONArray contentArray = jsonObject.getJSONArray("content");
+        String idModel = contentArray.getJSONObject(0).getString("id");
+
+        query = "{\"operationName\":\"getRepresentationDescriptions\",\"variables\":{\"editingContextId\":\"" + projectId + "\",\"objectId\":\"" + idModel + "\"},\"query\":\"query getRepresentationDescriptions($editingContextId: ID!, $objectId: ID!) { viewer { editingContext(editingContextId: $editingContextId) { representationDescriptions(objectId: $objectId) { edges { node { id label defaultName __typename } __typename } pageInfo { hasNextPage hasPreviousPage startCursor endCursor __typename } __typename } __typename } __typename } }\"}";
+        request = new HttpEntity<>(query, headers);
+        response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        jsonResponse = new JSONObject(response.getBody());
+        edges = jsonResponse.getJSONObject("data")
+                            .getJSONObject("viewer")
+                            .getJSONObject("editingContext")
+                            .getJSONObject("representationDescriptions")
+                            .getJSONArray("edges");
+
+        String representationDescriptionId = "";
+        for (int i = 0; i < edges.length(); i++) {
+            JSONObject node = edges.getJSONObject(i).getJSONObject("node");
+            if (node.getString("label").equals("Class Diagram")) {
+                representationDescriptionId = node.getString("id");
+                break;
+            }
+        }
+
+        String classDiagramId = UUID.randomUUID().toString();
+        query = "{\"operationName\":\"createRepresentation\",\"variables\":{\"input\":{\"id\":\"" + classDiagramId + "\",\"editingContextId\":\"" + projectId + "\",\"objectId\":\"" + idModel + "\",\"representationDescriptionId\":\"" + representationDescriptionId + "\",\"representationName\":\"" + projectName + "\"}},\"query\":\"mutation createRepresentation($input: CreateRepresentationInput!) {createRepresentation(input: $input) {__typename ... on CreateRepresentationSuccessPayload {representation {id label kind __typename} __typename} ... on ErrorPayload {message __typename}}}\"}";
+        request = new HttpEntity<>(query, headers);
+        response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        jsonResponse = new JSONObject(response.getBody());
+        String representationId = jsonResponse.getJSONObject("data")
+                                    .getJSONObject("createRepresentation")
+                                    .getJSONObject("representation")
+                                    .getString("id");
+
+        return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId);
     }
 }
 
