@@ -135,7 +135,7 @@ public class ApiController {
         }
     }
 
-    @GetMapping("/graderResults")
+    @PostMapping("/graderResults")
     public ResponseEntity<String> getGraderResults(@RequestBody Map<String, String> requestBody) throws Exception {
         String attemptProjectId = (String) requestBody.get("attemptProjectId");
         String attemptDocumentId = postgreSqlService.getDocumentIdByProjectId(attemptProjectId);
