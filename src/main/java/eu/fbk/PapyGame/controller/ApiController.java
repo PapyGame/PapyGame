@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1")
-public class ApiController_old {
+public class ApiController {
     @Autowired
     private JsonDiffCheckerService jsonDiffCheckerService;
     @Autowired
