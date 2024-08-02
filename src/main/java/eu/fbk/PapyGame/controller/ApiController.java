@@ -163,7 +163,7 @@ public class ApiController {
 
         StringBuilder results = new StringBuilder();
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "tempJarPath.toString()");
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
