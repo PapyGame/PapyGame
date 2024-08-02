@@ -13,4 +13,9 @@ public class PostgreSqlService {
         String sql = "SELECT content FROM document WHERE project_id = \'" + project_id + "\'";
         return jdbcTemplate.queryForObject(sql, String.class);
     }
+
+    public String getDocumentIdByProjectId(String project_id) {
+        String sql = "SELECT id FROM document WHERE project_id = \'" + project_id + "\'";
+        return jdbcTemplate.queryForObject(sql, String.class);
+    }
 }

@@ -1,5 +1,12 @@
 package eu.fbk.PapyGame.controller;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -7,6 +14,7 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -128,56 +136,57 @@ public class ApiController {
     }
 
     @GetMapping("/graderResults")
-    public ResponseEntity<String> getGraderResults(@RequestParam(name = "user") String user) {
-        String results;
+    public ResponseEntity<String> getGraderResults(@RequestBody Map<String, String> requestBody) throws Exception {
+        String attemptProjectId = (String) requestBody.get("attemptProjectId");
+        String attemptDocumentId = postgreSqlService.getDocumentIdByProjectId(attemptProjectId);
+        String solutionProjectId = (String) requestBody.get("solutionProjectId");
+        String solutionDocumentId = postgreSqlService.getDocumentIdByProjectId(solutionProjectId);
 
-        switch (user) {
-            case "41bddc5b-2835-4f2b-a39d-509fe2f2def6":
-                results = "Grade: 9.5 out of 11.0\n" +
-        "Classes\n" +
-        "  - Customer: 2.0 points - Comments: Equivalent to solution class Customer.\n" +
-        "  - Account: 2.0 points - Comments: Equivalent to solution class Account.\n" +
-        "Attributes\n" +
-        "  - Customer.name: 1.0 points - Comments: Equivalent to solution attribute Customer.name.\n" +
-        "  - Account.balance: 1.0 points - Comments: Equivalent to solution attribute Account.balance.\n" +
-        "Associations\n" +
-        "  - Account_Customer: 2.0 points - Comments: Equivalent to solution association Account_Customer.\n" +
-        "Association Ends\n" +
-        "  - Account.owner: 1.0 points - Comments: Equivalent to solution association end Account.owner.\n" +
-        "  - Customer.accounts: 0.5 points - Comments: Equivalent to solution association end Customer.accounts. Wrong lower bound, hence half points.";
-                break;
-            case "student":
-                results = "Grade: 22.0 out of 58.0\r\n" + //
-                            "Classes\r\n" + //
-                            "  - Guest: 2.0 points - Comments: Equivalent to solution class Person.\r\n" + //
-                            "  - Room: 2.0 points - Comments: Equivalent to solution class Room.\r\n" + //
-                            "  - Reservation: 2.0 points - Comments: Equivalent to solution class Booking.\r\n" + //
-                            "Attributes\r\n" + //
-                            "  - Guest.address: 1.0 points - Comments: Equivalent to solution attribute Person.address.\r\n" + //
-                            "  - Guest.telephone: 1.0 points - Comments: Equivalent to solution attribute Person.phoneNumber.\r\n" + //
-                            "  - Guest.firstname: 1.0 points - Comments: Equivalent to solution attribute Person.name.\r\n" + //
-                            "  - Guest.lastname: 0.0 points - Comments: Also equivalent to solution attribute Person.name, hence no points.\r\n" + //
-                            "  - Guest.creditcard: 1.0 points - Comments: Equivalent to solution attribute Person.creditcard.\r\n" + //
-                            "  - Room.roomnumber: 1.0 points - Comments: Equivalent to solution attribute Room.roomNumber.\r\n" + //
-                            "  - Room.bednumber: 0.0 points - Comments: Also equivalent to solution attribute Room.roomNumber, hence no points.\r\n" + //
-                            "Associations\r\n" + //
-                            "  - Room_Room: 2.0 points - Comments: Equivalent to solution association Room_Room.\r\n" + //
-                            "  - Reservation_Room: 2.0 points - Comments: Equivalent to solution association Room_Booking.\r\n" + //
-                            "  - Reservation_Guest: 2.0 points - Comments: Equivalent to solution association Person_Booking.\r\n" + //
-                            "Association Ends\r\n" + //
-                            "  - Room.isAdjacentTo: 0.5 points - Comments: Equivalent to solution association end Room.adjoinedRooms. Wrong upper bound, hence half points.\r\n" + //
-                            "  - Reservation.reserved: 0.0 points - Comments: Equivalent to solution association end Booking.bookedRooms. Wrong bounds, hence no points.\r\n" + //
-                            "  - Room.reservedBy: 0.5 points - Comments: Equivalent to solution association end Room.book. Wrong upper bound, hence half points.\r\n" + //
-                            "  - Reservation.madeBy: 1.0 points - Comments: Equivalent to solution association end Booking.by.\r\n" + //
-                            "  - Guest.make: 1.0 points - Comments: Equivalent to solution association end Person.bookings.\r\n" + //
-                            "Enumeration Types\r\n" + //
-                            "  - SmokingStatus: 1.0 points - Comments: Equivalent to solution enumeration type SmokingStatus.\r\n" + //
-                            "  - BedType: 1.0 points - Comments: Equivalent to solution enumeration type BedType.";
-                break;
-            default:
-                results = "NO RESULTS FOUND";
+        RestTemplate restTemplate = new RestTemplate();
+                
+        String url = "http://localhost:8080/api/editingcontexts/";
+
+        ClassPathResource classPathResource = new ClassPathResource("ClassdiagramGrader-jar-with-dependencies.jar");
+        Path tempJarPath = Files.createTempFile("grader-" + attemptProjectId + "-" + solutionProjectId, ".jar");
+        Files.copy(classPathResource.getInputStream(), tempJarPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        
+        Path attemptFilePath = Files.createTempFile("attempt" + attemptProjectId, ".uml");
+        File attemptFile = attemptFilePath.toFile();
+        Path solutionFilePath = Files.createTempFile("solution" + solutionProjectId, ".uml");
+        File solutionFile = solutionFilePath.toFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(attemptFile))) {
+            writer.write(restTemplate.getForObject(url + attemptProjectId + "/documents/" + attemptDocumentId, String.class));
         }
-        return ResponseEntity.ok(results);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(solutionFile))) {
+            writer.write(restTemplate.getForObject(url + solutionProjectId + "/documents/" + solutionDocumentId, String.class));
+        }
+
+        StringBuilder results = new StringBuilder();
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "tempJarPath.toString()");
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    results.append(line).append("\n");
+                }
+            }
+
+            int exitCode = process.waitFor();
+            results.append("Exited with code: ").append(exitCode);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            results.append("Error: ").append(e.getMessage());
+        }
+
+        Files.deleteIfExists(attemptFilePath);
+        Files.deleteIfExists(solutionFilePath);
+        Files.deleteIfExists(tempJarPath);
+
+        return ResponseEntity.ok(results.toString());
     }
 
     @PostMapping("/newBlankProject")
