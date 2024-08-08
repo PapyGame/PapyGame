@@ -34,9 +34,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.fbk.PapyGame.service.jdd.JsonDiffCheckerService;
 import eu.fbk.PapyGame.service.JsonFormatterService;
 import eu.fbk.PapyGame.model.Assignment;
+import eu.fbk.PapyGame.model.Project;
 import eu.fbk.PapyGame.service.AssignmentService;
 import eu.fbk.PapyGame.service.JsonComparisonService;
 import eu.fbk.PapyGame.service.PostgreSqlService;
+import eu.fbk.PapyGame.service.ProjectService;
+
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -47,6 +50,8 @@ public class ApiController {
     @Autowired
     private AssignmentService assignmentService;
     @Autowired
+    private ProjectService projectService;
+    @Autowired
     private JsonComparisonService jsonComparisonService;
     @Autowired
     private JsonFormatterService jsonFormatterService;
@@ -55,11 +60,16 @@ public class ApiController {
     
     @GetMapping("/assignment")
     public String getAssignment(@RequestParam String project_id) {
-        Assignment assignment = assignmentService.getAssignmentByProjectId(project_id);
-        if (assignment == null)
+        Project project = projectService.getAssignmentByProjectId(project_id);
+        if (project == null)
             return "No assignment related to this project";
-        else 
-            return assignment.getAssignmentText(); 
+        else {
+            Assignment assignment = assignmentService.getAssignmentByProjectId(project.getAssignmentId());
+            if (assignment != null)
+                return assignment.getAssignmentText(); 
+            else 
+                return "Something went wrong";
+        }
     }
 
     @GetMapping("/prova2")
@@ -191,8 +201,9 @@ public class ApiController {
 
     @PostMapping("/newBlankProject")
     public ResponseEntity<String> newBlankProject(@RequestBody Map<String, String> requestBody) throws Exception {
-        String projectName = (String) requestBody.get("projectName");
-        String assignment_text = (String) requestBody.get("assignment_text");
+        String ctxId = (String) requestBody.get("ctxId");
+        String projectName = ctxId + ".uml";
+        String assignment_id = (String) requestBody.get("assignment_id");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -201,6 +212,10 @@ public class ApiController {
         String url = "http://localhost:8080/api/graphql";
         ResponseEntity<String> response;
         JSONObject jsonResponse;
+
+        if (assignmentService.getAssignmentByProjectId(assignment_id) == null) {
+            return ResponseEntity.badRequest().body("No assignment related to this project_id");
+        }
 
         String id = UUID.randomUUID().toString();
 
@@ -276,9 +291,9 @@ public class ApiController {
                                     .getJSONObject("representation")
                                     .getString("id");
 
-        assignmentService.createAssignment(projectId, assignment_text);
+        projectService.createProject(projectId, assignment_id);
 
-        return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId);
+        return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId + "?ctxId=" + ctxId);
     }
 }
 

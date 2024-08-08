@@ -4,13 +4,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "assignments")
-public class Assignment {
+@Document(collection = "projects")
+public class Project {
     @Id
     private String id;
     @Indexed(unique = true)
     private String project_id;
-    private String assignment_text;
+    private String assignment_id;
 
     // Getters and setters
 
@@ -26,20 +26,20 @@ public class Assignment {
         this.project_id = projectId;
     }
 
-    public String getAssignmentText() {
-        return assignment_text;
+    public String getAssignmentId() {
+        return assignment_id;
     }
 
-    public void setAssignmentText(String assignmentText) {
-        this.assignment_text = assignmentText;
+    public void setAssignmentId(String assignmentId) {
+        this.assignment_id = assignmentId;
     }
 
     @Override
     public String toString() {
-        return "Assignment{" +
+        return "Project{" +
                 "id='" + id + '\'' +
                 ", project_id='" + project_id + '\'' +
-                ", assignment_text='" + assignment_text + '\'' +
+                ", assignment_id='" + assignment_id + '\'' +
                 '}';
     }
 }
