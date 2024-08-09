@@ -1,16 +1,23 @@
 package eu.fbk.PapyGame.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "projects")
+@CompoundIndexes({
+    @CompoundIndex(name = "unique_project_ctx", def = "{'project_id': 1, 'ctxId': 1}", unique = true)
+})
 public class Project {
     @Id
     private String id;
     @Indexed(unique = true)
     private String project_id;
+    private String representationId;
     private String assignment_id;
+    private String ctxId;
 
     // Getters and setters
 
@@ -26,6 +33,14 @@ public class Project {
         this.project_id = projectId;
     }
 
+    public String getRepresentationId() {
+        return representationId;
+    }
+
+    public void setRepresentationId(String representationId) {
+        this.representationId = representationId;
+    }
+
     public String getAssignmentId() {
         return assignment_id;
     }
@@ -34,12 +49,22 @@ public class Project {
         this.assignment_id = assignmentId;
     }
 
+    public String getCtxId() {
+        return ctxId;
+    }
+
+    public void setCtxId(String ctxId) {
+        this.ctxId = ctxId;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
                 "id='" + id + '\'' +
                 ", project_id='" + project_id + '\'' +
+                ", representation_id='" + representationId + '\'' +
                 ", assignment_id='" + assignment_id + '\'' +
+                ", ctxId='" + ctxId + '\'' +
                 '}';
     }
 }

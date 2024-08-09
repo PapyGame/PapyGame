@@ -60,7 +60,7 @@ public class ApiController {
     
     @GetMapping("/assignment")
     public String getAssignment(@RequestParam String project_id) {
-        Project project = projectService.getAssignmentByProjectId(project_id);
+        Project project = projectService.getProjectByProjectId(project_id);
         if (project == null)
             return "No assignment related to this project";
         else {
@@ -202,8 +202,24 @@ public class ApiController {
     @PostMapping("/newBlankProject")
     public ResponseEntity<String> newBlankProject(@RequestBody Map<String, String> requestBody) throws Exception {
         String ctxId = (String) requestBody.get("ctxId");
-        String projectName = ctxId + ".uml";
         String assignment_id = (String) requestBody.get("assignment_id");
+        String nomeUtente = (String) requestBody.get("nomeUtente");
+        String projectName = nomeUtente + ".uml";
+
+        if (assignmentService.getAssignmentByProjectId(assignment_id) == null) {
+            return ResponseEntity.badRequest().body("No assignment related to this project_id");
+        }
+
+        List<Project> projects = projectService.getProjectByCtxId(ctxId);
+
+        if (projects.size() > 0) {
+            for (Project project : projects) {
+                if (project.getAssignmentId().equals(assignment_id)) {
+                    return ResponseEntity.ok("https://papygame.tech/projects/"+ project.getProjectId() + "/edit/" + project.getRepresentationId() + "?ctxId=" + ctxId);
+                }
+            }
+        }
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -212,10 +228,6 @@ public class ApiController {
         String url = "http://localhost:8080/api/graphql";
         ResponseEntity<String> response;
         JSONObject jsonResponse;
-
-        if (assignmentService.getAssignmentByProjectId(assignment_id) == null) {
-            return ResponseEntity.badRequest().body("No assignment related to this project_id");
-        }
 
         String id = UUID.randomUUID().toString();
 
@@ -291,7 +303,7 @@ public class ApiController {
                                     .getJSONObject("representation")
                                     .getString("id");
 
-        projectService.createProject(projectId, assignment_id);
+        projectService.createProject(projectId, representationId, assignment_id, ctxId);
 
         return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId + "?ctxId=" + ctxId);
     }

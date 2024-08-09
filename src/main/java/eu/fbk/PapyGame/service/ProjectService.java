@@ -4,6 +4,8 @@ import eu.fbk.PapyGame.model.Project;
 // import eu.fbk.PapyGame.repository.ProjectRepository;
 import eu.fbk.PapyGame.repository.ProjectRepository;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +15,12 @@ public class ProjectService {
     @Autowired
     private ProjectRepository projectRepository;
 
-    public void createProject(String project_id, String assignment_id) {
+    public void createProject(String project_id, String representationId, String assignment_id, String ctxId) {
         Project project = new Project();
         project.setProjectId(project_id);
+        project.setRepresentationId(representationId);
         project.setAssignmentId(assignment_id);
+        project.setCtxId(ctxId);
         projectRepository.save(project);
     }
 
@@ -24,11 +28,15 @@ public class ProjectService {
         return projectRepository.findById(id).orElse(null);
     }
 
-    public Project saveAssignment(Project assignment) {
-        return projectRepository.save(assignment);
+    public Project saveProject(Project project) {
+        return projectRepository.save(project);
     }
 
-    public Project getAssignmentByProjectId(String project_id) {
+    public Project getProjectByProjectId(String project_id) {
         return projectRepository.findByProjectId(project_id);
+    }
+
+    public List<Project> getProjectByCtxId(String ctxId) {
+        return projectRepository.findByCtxId(ctxId);
     }
 }
