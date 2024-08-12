@@ -146,7 +146,7 @@ public class ApiController {
     }
 
     @PostMapping("/graderResults")
-    public ResponseEntity<String> getGraderResults(@RequestBody Map<String, String> requestBody) throws Exception {
+    public ResponseEntity<JSONObject> getGraderResults(@RequestBody Map<String, String> requestBody) throws Exception {
         String attemptProjectId = (String) requestBody.get("attemptProjectId");
         String attemptDocumentId = postgreSqlService.getDocumentIdByProjectId(attemptProjectId);
         String solutionProjectId = (String) requestBody.get("solutionProjectId");
@@ -172,8 +172,10 @@ public class ApiController {
         }
 
         StringBuilder results = new StringBuilder();
+        JSONObject jsonResponse = null;
+
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-json", "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -187,16 +189,17 @@ public class ApiController {
             int exitCode = process.waitFor();
             results.append("Exited with code: ").append(exitCode);
 
+            jsonResponse = new JSONObject(results.toString());
         } catch (Exception e) {
             e.printStackTrace();
-            results.append("Error: ").append(e.getMessage());
+            return ResponseEntity.status(500).body(new JSONObject().put("error", e.getMessage()));
         }
 
         Files.deleteIfExists(attemptFilePath);
         Files.deleteIfExists(solutionFilePath);
         Files.deleteIfExists(tempJarPath);
 
-        return ResponseEntity.ok(results.toString());
+        return ResponseEntity.ok(jsonResponse);
     }
 
     @PostMapping("/newBlankProject")
