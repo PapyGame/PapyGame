@@ -166,9 +166,11 @@ public class ApiController {
         File solutionFile = solutionFilePath.toFile();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(attemptFile))) {
             writer.write(restTemplate.getForObject(url + attemptProjectId + "/documents/" + attemptDocumentId, String.class));
+            writer.flush();
         }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(solutionFile))) {
             writer.write(restTemplate.getForObject(url + solutionProjectId + "/documents/" + solutionDocumentId, String.class));
+            writer.flush();
         }
 
         StringBuilder results = new StringBuilder();
