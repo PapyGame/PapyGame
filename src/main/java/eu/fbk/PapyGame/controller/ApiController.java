@@ -145,11 +145,11 @@ public class ApiController {
         }
     }
 
-    @PostMapping("/graderResults")
-    public ResponseEntity<JSONObject> getGraderResults(@RequestBody Map<String, String> requestBody) throws Exception {
-        String attemptProjectId = (String) requestBody.get("attemptProjectId");
+    @GetMapping("/graderResults")
+    public ResponseEntity<String> getGraderResults(@RequestParam("projectId") String attemptProjectId) throws Exception {
         String attemptDocumentId = postgreSqlService.getDocumentIdByProjectId(attemptProjectId);
-        String solutionProjectId = (String) requestBody.get("solutionProjectId");
+        Project project = projectService.getProjectByProjectId(attemptProjectId);
+        String solutionProjectId = project.getAssignmentId();
         String solutionDocumentId = postgreSqlService.getDocumentIdByProjectId(solutionProjectId);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -172,8 +172,6 @@ public class ApiController {
         }
 
         StringBuilder results = new StringBuilder();
-        JSONObject jsonResponse = null;
-
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-json", "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
             processBuilder.redirectErrorStream(true);
@@ -182,24 +180,24 @@ public class ApiController {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    results.append(line).append("\n");
+                    results.append(line);
                 }
             }
 
             int exitCode = process.waitFor();
-            results.append("Exited with code: ").append(exitCode);
-
-            jsonResponse = new JSONObject(results.toString());
+            if (exitCode != 0) {
+                return ResponseEntity.status(500).body("Process exited with code: " + exitCode);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(new JSONObject().put("error", e.getMessage()));
+            return ResponseEntity.status(500).body("Error" + e.getMessage());
         }
 
         Files.deleteIfExists(attemptFilePath);
         Files.deleteIfExists(solutionFilePath);
         Files.deleteIfExists(tempJarPath);
 
-        return ResponseEntity.ok(jsonResponse);
+        return ResponseEntity.ok(jsonFormatterService.format(results.toString()));
     }
 
     @PostMapping("/newBlankProject")
