@@ -18,7 +18,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+// import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,15 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+// import com.fasterxml.jackson.databind.JsonNode;
+// import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.fbk.PapyGame.service.jdd.JsonDiffCheckerService;
+// import eu.fbk.PapyGame.service.jdd.JsonDiffCheckerService;
 import eu.fbk.PapyGame.service.JsonFormatterService;
 import eu.fbk.PapyGame.model.Assignment;
 import eu.fbk.PapyGame.model.Project;
 import eu.fbk.PapyGame.service.AssignmentService;
-import eu.fbk.PapyGame.service.JsonComparisonService;
+// import eu.fbk.PapyGame.service.JsonComparisonService;
 import eu.fbk.PapyGame.service.PostgreSqlService;
 import eu.fbk.PapyGame.service.ProjectService;
 
@@ -45,14 +45,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/v1")
 public class ApiController {
-    @Autowired
-    private JsonDiffCheckerService jsonDiffCheckerService;
+    // @Autowired
+    // private JsonDiffCheckerService jsonDiffCheckerService;
     @Autowired
     private AssignmentService assignmentService;
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private JsonComparisonService jsonComparisonService;
+    // @Autowired
+    // private JsonComparisonService jsonComparisonService;
     @Autowired
     private JsonFormatterService jsonFormatterService;
     @Autowired
@@ -103,15 +103,16 @@ public class ApiController {
 
     @PostMapping("/createAssignment")
     public ResponseEntity<String> postMethodName(@RequestBody Map<String, String> requestBody) {
-        Project project = projectService.getProjectByProjectId(requestBody.get("project_id"));
+        String projectId = requestBody.get("project_id");
+        String assignmentText = requestBody.get("assignment_text");
+        String project = postgreSqlService.getDocumentIdByProjectId(projectId);
         if (project == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");
         }
-        assignmentService.createAssignment(requestBody.get("project_id"), requestBody.get("assignment_text"));
+        assignmentService.createAssignment(projectId, assignmentText);
         return ResponseEntity.ok("Assignment created successfully");
     }
     
-
     @GetMapping("/assignmentProjects")
     public ResponseEntity<List<Assignment>> getAssignmentProjects() {
         return ResponseEntity.ok(assignmentService.getAllAssignments());
@@ -195,7 +196,6 @@ public class ApiController {
         }
     }
     
-
     @PostMapping("/newBlankProject")
     public ResponseEntity<String> newBlankProject(@RequestBody Map<String, String> requestBody) throws Exception {
         String ctxId = (String) requestBody.get("ctxId");
