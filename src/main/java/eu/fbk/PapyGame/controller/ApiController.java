@@ -101,6 +101,22 @@ public class ApiController {
     //     }
     // }
 
+    @PostMapping("/createAssignment")
+    public ResponseEntity<String> postMethodName(@RequestBody Map<String, String> requestBody) {
+        Project project = projectService.getProjectByProjectId(requestBody.get("project_id"));
+        if (project == null) {
+            return ResponseEntity.badRequest().body("No project related to this project_id");
+        }
+        assignmentService.createAssignment(requestBody.get("project_id"), requestBody.get("assignment_text"));
+        return ResponseEntity.ok("Assignment created successfully");
+    }
+    
+
+    @GetMapping("/assignmentProjects")
+    public ResponseEntity<List<Assignment>> getAssignmentProjects() {
+        return ResponseEntity.ok(assignmentService.getAllAssignments());
+    }
+
     @GetMapping("/graderResults")
     public ResponseEntity<String> getGraderResults(@RequestParam("project_id") String attemptProjectId) throws Exception {
         Project attemptProject = projectService.getProjectByProjectId(attemptProjectId);
@@ -166,7 +182,7 @@ public class ApiController {
     }
 
     @GetMapping("/existingGrade")
-    public ResponseEntity<String> existingGrade(@RequestParam("project_id") String projectId) {
+    public ResponseEntity<String> getExistingGrade(@RequestParam("project_id") String projectId) {
         Project project = projectService.getProjectByProjectId(projectId);
         if (project == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");

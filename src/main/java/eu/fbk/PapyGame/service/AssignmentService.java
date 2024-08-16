@@ -3,6 +3,8 @@ package eu.fbk.PapyGame.service;
 import eu.fbk.PapyGame.model.Assignment;
 import eu.fbk.PapyGame.repository.AssignmentRepository;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +34,9 @@ public class AssignmentService {
 
     public Assignment getAssignmentByProjectId(String project_id) {
         return assignmentRepository.findByProjectId(project_id);
+    }
+
+    public List<Assignment> getAllAssignments() {
+        return assignmentRepository.findAll();
     }
 }
