@@ -172,7 +172,7 @@ public class ApiController {
             return ResponseEntity.badRequest().body("No project related to this project_id");
         }
         String previousResults = project.getGraderResults();
-        if (previousResults.equals("")) {
+        if (previousResults == null || previousResults.isEmpty()) {
             return ResponseEntity.ok().body("{}");
         } else {
             return ResponseEntity.ok(jsonFormatterService.format(previousResults));
@@ -196,7 +196,7 @@ public class ApiController {
         if (projects.size() > 0) {
             for (Project project : projects) {
                 if (project.getAssignmentId().equals(assignment_id)) {
-                    if (!project.getGraderResults().equals("")) {
+                    if (!project.getGraderResults().isEmpty()) {
                         project.setGraderResults("");
                         projectService.saveProject(project);
                     }
