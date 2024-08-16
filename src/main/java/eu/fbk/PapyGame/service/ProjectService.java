@@ -21,6 +21,7 @@ public class ProjectService {
         project.setRepresentationId(representationId);
         project.setAssignmentId(assignment_id);
         project.setCtxId(ctxId);
+        project.setGraderResults("");
         projectRepository.save(project);
     }
 

@@ -72,84 +72,44 @@ public class ApiController {
         }
     }
 
-    @GetMapping("/prova2")
-    public void prova2(@RequestParam String json1, @RequestParam String json2) {
-        // json = jsonFormatterService.format(json);
-        // jsonMapperService.jsonMapper(json);
-        jsonDiffCheckerService.jsonDiffChecker(json1, json2);
-    }
+    // @GetMapping("/constraints")
+    // public ResponseEntity<Map<String, Integer>> getConstraints(@RequestParam(name = "user") String user) {
+    //     String projectId;
+    //     switch (user) {
+    //         // case "student":
+    //         //     projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
+    //         //     break;
+    //         case "teacher":
+    //             projectId = "6c3a0179-eda2-4bac-a05d-906d437433f7";
+    //             break;
+    //         default:
+    //             projectId = user;
+    //             // throw new IllegalArgumentException("Invalid user type");
+    //     }
 
-    @PostMapping("/compare")
-    public void compareJson(@RequestBody String requestBody) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(requestBody);
+    //     String content = postgreSqlService.getContentByProjectId(projectId);
+    //     String formattedJson = jsonFormatterService.format(content);
 
-        // jsonComparisonService.getConstraints(jsonNode.get("teacher"));
-        List<String> differences = jsonComparisonService.compareJson(jsonNode.get("teacher"), jsonNode.get("student"));
-        for (String string : differences) {
-            System.out.println(string);
-        }
-    }
+    //     try {
+    //         ObjectMapper objectMapper = new ObjectMapper();
+    //         JsonNode jsonNode = objectMapper.readTree(formattedJson);
 
-    @PostMapping("/format")
-    public ResponseEntity<String> formatJson(@RequestBody String json) throws Exception {
-        return ResponseEntity.ok(jsonFormatterService.format(json));
-    }
-
-    @GetMapping("/getFormattedJson")
-    public ResponseEntity<String> getFormattedJson(@RequestParam(name = "user") String user) {
-        String projectId;
-        switch (user) {
-            // case "student":
-            //     projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
-            //     break;
-            case "teacher":
-                projectId = "6c3a0179-eda2-4bac-a05d-906d437433f7";
-                break;
-            default:
-                projectId = user;
-                // throw new IllegalArgumentException("Invalid user type");
-        }
-
-        String content = postgreSqlService.getContentByProjectId(projectId);
-
-        return ResponseEntity.ok(jsonFormatterService.format(content));
-    }
-
-    @GetMapping("/constraints")
-    public ResponseEntity<Map<String, Integer>> getConstraints(@RequestParam(name = "user") String user) {
-        String projectId;
-        switch (user) {
-            // case "student":
-            //     projectId = "3654b5d7-f8cb-4f4f-a38b-018816bdc06e";
-            //     break;
-            case "teacher":
-                projectId = "6c3a0179-eda2-4bac-a05d-906d437433f7";
-                break;
-            default:
-                projectId = user;
-                // throw new IllegalArgumentException("Invalid user type");
-        }
-
-        String content = postgreSqlService.getContentByProjectId(projectId);
-        String formattedJson = jsonFormatterService.format(content);
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(formattedJson);
-
-            return ResponseEntity.ok(jsonComparisonService.getConstraints(jsonNode));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+    //         return ResponseEntity.ok(jsonComparisonService.getConstraints(jsonNode));
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    //     }
+    // }
 
     @GetMapping("/graderResults")
     public ResponseEntity<String> getGraderResults(@RequestParam("projectId") String attemptProjectId) throws Exception {
+        Project attemptProject = projectService.getProjectByProjectId(attemptProjectId);
+        if (attemptProject == null) {
+            return ResponseEntity.badRequest().body("No project related to this project_id");
+        }
+
         String attemptDocumentId = postgreSqlService.getDocumentIdByProjectId(attemptProjectId);
-        Project project = projectService.getProjectByProjectId(attemptProjectId);
-        String solutionProjectId = project.getAssignmentId();
+        String solutionProjectId = attemptProject.getAssignmentId();
         String solutionDocumentId = postgreSqlService.getDocumentIdByProjectId(solutionProjectId);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -175,7 +135,7 @@ public class ApiController {
 
         StringBuilder results = new StringBuilder();
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-json", "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", tempJarPath.toString(), "-jsonOutput", "-a", attemptFilePath.toString(), "-s", solutionFilePath.toString());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -199,8 +159,26 @@ public class ApiController {
         Files.deleteIfExists(solutionFilePath);
         Files.deleteIfExists(tempJarPath);
 
+        attemptProject.setGraderResults(results.toString());
+        projectService.saveProject(attemptProject);
+
         return ResponseEntity.ok(jsonFormatterService.format(results.toString()));
     }
+
+    @GetMapping("/existingGrade")
+    public ResponseEntity<String> existingGrade(@RequestParam("projectId") String projectId) {
+        Project project = projectService.getProjectByProjectId(projectId);
+        if (project == null) {
+            return ResponseEntity.badRequest().body("No project related to this project_id");
+        }
+        String previousResults = project.getGraderResults();
+        if (previousResults.equals("")) {
+            return ResponseEntity.badRequest().body("");
+        } else {
+            return ResponseEntity.ok(jsonFormatterService.format(previousResults));
+        }
+    }
+    
 
     @PostMapping("/newBlankProject")
     public ResponseEntity<String> newBlankProject(@RequestBody Map<String, String> requestBody) throws Exception {
@@ -218,6 +196,10 @@ public class ApiController {
         if (projects.size() > 0) {
             for (Project project : projects) {
                 if (project.getAssignmentId().equals(assignment_id)) {
+                    if (!project.getGraderResults().equals("")) {
+                        project.setGraderResults("");
+                        projectService.saveProject(project);
+                    }
                     return ResponseEntity.ok("https://papygame.tech/projects/"+ project.getProjectId() + "/edit/" + project.getRepresentationId() + "?ctxId=" + ctxId);
                 }
             }

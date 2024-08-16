@@ -18,6 +18,7 @@ public class Project {
     private String representationId;
     private String assignment_id;
     private String ctxId;
+    private String graderResults;
 
     // Getters and setters
 
@@ -57,6 +58,14 @@ public class Project {
         this.ctxId = ctxId;
     }
 
+    public String getGraderResults() {
+        return graderResults;
+    }
+
+    public void setGraderResults(String graderResults) {
+        this.graderResults = graderResults;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -65,6 +74,7 @@ public class Project {
                 ", representation_id='" + representationId + '\'' +
                 ", assignment_id='" + assignment_id + '\'' +
                 ", ctxId='" + ctxId + '\'' +
+                ", graderResults='" + graderResults + '\'' +
                 '}';
     }
 }
