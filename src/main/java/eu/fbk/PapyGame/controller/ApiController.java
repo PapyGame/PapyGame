@@ -102,7 +102,7 @@ public class ApiController {
     // }
 
     @PostMapping("/createAssignment")
-    public ResponseEntity<String> createAssignment(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<String> assignmentCreation(@RequestBody Map<String, String> requestBody) {
         String projectId = requestBody.get("project_id");
         String assignmentText = requestBody.get("assignment_text");
         String project = postgreSqlService.getDocumentIdByProjectId(projectId);
