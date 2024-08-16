@@ -102,7 +102,7 @@ public class ApiController {
     // }
 
     @GetMapping("/graderResults")
-    public ResponseEntity<String> getGraderResults(@RequestParam("projectId") String attemptProjectId) throws Exception {
+    public ResponseEntity<String> getGraderResults(@RequestParam("project_id") String attemptProjectId) throws Exception {
         Project attemptProject = projectService.getProjectByProjectId(attemptProjectId);
         if (attemptProject == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");
@@ -166,7 +166,7 @@ public class ApiController {
     }
 
     @GetMapping("/existingGrade")
-    public ResponseEntity<String> existingGrade(@RequestParam("projectId") String projectId) {
+    public ResponseEntity<String> existingGrade(@RequestParam("project_id") String projectId) {
         Project project = projectService.getProjectByProjectId(projectId);
         if (project == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");
