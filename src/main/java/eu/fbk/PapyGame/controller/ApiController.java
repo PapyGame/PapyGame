@@ -173,7 +173,7 @@ public class ApiController {
         }
         String previousResults = project.getGraderResults();
         if (previousResults.equals("")) {
-            return ResponseEntity.badRequest().body("");
+            return ResponseEntity.ok().body("");
         } else {
             return ResponseEntity.ok(jsonFormatterService.format(previousResults));
         }
