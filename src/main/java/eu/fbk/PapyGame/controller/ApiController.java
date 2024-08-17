@@ -109,8 +109,15 @@ public class ApiController {
         if (project == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");
         }
-        assignmentService.createAssignment(projectId, assignmentText);
-        return ResponseEntity.ok("Assignment created successfully");
+        Assignment assignment = assignmentService.getAssignmentByProjectId(projectId);
+        if (assignment != null) {
+            assignment.setAssignmentText(assignmentText);
+            assignmentService.saveAssignment(assignment);
+            return ResponseEntity.ok("Assignment modified successfully");
+        } else {
+            assignmentService.createAssignment(projectId, assignmentText);
+            return ResponseEntity.ok("Assignment created successfully");
+        }
     }
     
     @GetMapping("/assignmentProjects")
