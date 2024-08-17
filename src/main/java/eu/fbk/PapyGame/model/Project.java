@@ -15,7 +15,7 @@ public class Project {
     private String id;
     @Indexed(unique = true)
     private String project_id;
-    private String representationId;
+    private String representation_id;
     private String assignment_id;
     private String ctxId;
     private String graderResults;
@@ -35,11 +35,11 @@ public class Project {
     }
 
     public String getRepresentationId() {
-        return representationId;
+        return representation_id;
     }
 
     public void setRepresentationId(String representationId) {
-        this.representationId = representationId;
+        this.representation_id = representationId;
     }
 
     public String getAssignmentId() {
@@ -71,7 +71,7 @@ public class Project {
         return "Project{" +
                 "id='" + id + '\'' +
                 ", project_id='" + project_id + '\'' +
-                ", representation_id='" + representationId + '\'' +
+                ", representation_id='" + representation_id + '\'' +
                 ", assignment_id='" + assignment_id + '\'' +
                 ", ctxId='" + ctxId + '\'' +
                 ", graderResults='" + graderResults + '\'' +

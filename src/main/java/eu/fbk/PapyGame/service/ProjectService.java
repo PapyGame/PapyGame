@@ -15,10 +15,10 @@ public class ProjectService {
     @Autowired
     private ProjectRepository projectRepository;
 
-    public void createProject(String project_id, String representationId, String assignment_id, String ctxId) {
+    public void createProject(String project_id, String representation_id, String assignment_id, String ctxId) {
         Project project = new Project();
         project.setProjectId(project_id);
-        project.setRepresentationId(representationId);
+        project.setRepresentationId(representation_id);
         project.setAssignmentId(assignment_id);
         project.setCtxId(ctxId);
         project.setGraderResults("");

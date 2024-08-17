@@ -202,6 +202,7 @@ public class ApiController {
         String assignment_id = (String) requestBody.get("assignment_id");
         String nomeUtente = (String) requestBody.get("nomeUtente");
         String projectName = nomeUtente + ".uml";
+        String projectJson;
 
         if (assignmentService.getAssignmentByProjectId(assignment_id) == null) {
             return ResponseEntity.badRequest().body("No assignment related to this project_id");
@@ -216,7 +217,8 @@ public class ApiController {
                         project.setGraderResults("");
                         projectService.saveProject(project);
                     }
-                    return ResponseEntity.ok("https://papygame.tech/projects/"+ project.getProjectId() + "/edit/" + project.getRepresentationId() + "?ctxId=" + ctxId);
+                    projectJson = "{ \"project_id\": \"" + project.getProjectId() + "\", \"representation_id\": \"" + project.getRepresentationId() + "\" }";
+                    return ResponseEntity.ok(jsonFormatterService.format(projectJson));
                 }
             }
         }
@@ -306,7 +308,8 @@ public class ApiController {
 
         projectService.createProject(projectId, representationId, assignment_id, ctxId);
 
-        return ResponseEntity.ok("https://papygame.tech/projects/"+ projectId + "/edit/" + representationId + "?ctxId=" + ctxId);
+        projectJson = "{ \"project_id\": \"" + projectId + "\", \"representation_id\": \"" + representationId + "\" }";
+        return ResponseEntity.ok(jsonFormatterService.format(projectJson));
     }
 }
 
