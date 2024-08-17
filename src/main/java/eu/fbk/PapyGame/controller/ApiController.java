@@ -230,6 +230,30 @@ public class ApiController {
             }
         }
 
+        Map<String, String> projectCreation = projectCreation(projectName);
+        String projectId = projectCreation.get("projectId");
+        String representationId = projectCreation.get("representationId");
+
+        projectService.createProject(projectId, representationId, assignment_id, ctxId);
+
+        projectJson = "{\"project_id\":\"" + projectId + "\",\"representation_id\":\"" + representationId + "\"}";
+        return ResponseEntity.ok(jsonFormatterService.format(projectJson));
+    }
+
+    @PostMapping("/newAssignmentProject")
+    public ResponseEntity<String> newAssignmentProject(@RequestBody Map<String, String> requestBody) {
+        String nomeUtente = (String) requestBody.get("nomeUtente");
+        String projectName = nomeUtente + ".uml";
+
+        Map<String, String> projectCreation = projectCreation(projectName);
+        String projectId = projectCreation.get("project_id");
+        String representationId = projectCreation.get("representation_id");
+
+        String projectJson = "{\"project_id\":\"" + projectId + "\",\"representation_id\":\"" + representationId + "\"}";
+        return ResponseEntity.ok(jsonFormatterService.format(projectJson));
+    }
+
+    private Map<String, String> projectCreation(String projectName) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -313,10 +337,8 @@ public class ApiController {
                                     .getJSONObject("representation")
                                     .getString("id");
 
-        projectService.createProject(projectId, representationId, assignment_id, ctxId);
-
-        projectJson = "{\"project_id\":\"" + projectId + "\",\"representation_id\":\"" + representationId + "\"}";
-        return ResponseEntity.ok(jsonFormatterService.format(projectJson));
+        Map<String, String> result = Map.of("project_id", projectId, "representation_id", representationId);
+        return result;
     }
 }
 
