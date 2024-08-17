@@ -217,7 +217,7 @@ public class ApiController {
                         project.setGraderResults("");
                         projectService.saveProject(project);
                     }
-                    projectJson = "{ \"project_id\": \"" + project.getProjectId() + "\", \"representation_id\": \"" + project.getRepresentationId() + "\" }";
+                    projectJson = "{\"project_id\":\"" + project.getProjectId() + "\",\"representation_id\":\"" + project.getRepresentationId() + "\"}";
                     return ResponseEntity.ok(jsonFormatterService.format(projectJson));
                 }
             }
@@ -308,7 +308,7 @@ public class ApiController {
 
         projectService.createProject(projectId, representationId, assignment_id, ctxId);
 
-        projectJson = "{ \"project_id\": \"" + projectId + "\", \"representation_id\": \"" + representationId + "\" }";
+        projectJson = "{\"project_id\":\"" + projectId + "\",\"representation_id\":\"" + representationId + "\"}";
         return ResponseEntity.ok(jsonFormatterService.format(projectJson));
     }
 }
