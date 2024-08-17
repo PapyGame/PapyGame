@@ -231,8 +231,8 @@ public class ApiController {
         }
 
         Map<String, String> projectCreation = projectCreation(projectName);
-        String projectId = projectCreation.get("projectId");
-        String representationId = projectCreation.get("representationId");
+        String projectId = projectCreation.get("project_id");
+        String representationId = projectCreation.get("representation_id");
 
         projectService.createProject(projectId, representationId, assignment_id, ctxId);
 
