@@ -193,11 +193,11 @@ public class ApiController {
     public ResponseEntity<String> getExistingGrade(@RequestParam("project_id") String projectId) {
         Project project = projectService.getProjectByProjectId(projectId);
         if (project == null) {
-            return ResponseEntity.badRequest().body("No project related to this project_id");
+            return ResponseEntity.ok("{}");
         }
         String previousResults = project.getGraderResults();
         if (previousResults == null || previousResults.isEmpty()) {
-            return ResponseEntity.ok().body("{}");
+            return ResponseEntity.ok("{}");
         } else {
             return ResponseEntity.ok(jsonFormatterService.format(previousResults));
         }
