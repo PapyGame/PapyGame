@@ -102,9 +102,13 @@ public class ApiController {
     // }
 
     @PostMapping("/newAssignment")
-    public ResponseEntity<String> newAssignment(@RequestBody Map<String, String> requestBody) {
-        String projectId = requestBody.get("project_id");
-        String assignmentText = requestBody.get("assignment_text");
+    public ResponseEntity<String> newAssignment(@RequestBody Map<String, Object> requestBody) {
+        String projectId = (String) requestBody.get("project_id");
+        String assignmentTitle = (String) requestBody.get("assignment_title");
+        String assignmentText = (String) requestBody.get("assignment_text");
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> tags = (List<Map<String, String>>) requestBody.get("tags");
+
         String project = postgreSqlService.getDocumentIdByProjectId(projectId);
         if (project == null) {
             return ResponseEntity.badRequest().body("No project related to this project_id");
@@ -115,7 +119,7 @@ public class ApiController {
             assignmentService.saveAssignment(assignment);
             return ResponseEntity.ok("Assignment modified successfully");
         } else {
-            assignmentService.createAssignment(projectId, assignmentText);
+            assignmentService.createAssignment(projectId, assignmentTitle, assignmentText, tags);
             return ResponseEntity.ok("Assignment created successfully");
         }
     }

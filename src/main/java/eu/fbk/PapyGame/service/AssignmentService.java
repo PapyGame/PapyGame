@@ -4,6 +4,7 @@ import eu.fbk.PapyGame.model.Assignment;
 import eu.fbk.PapyGame.repository.AssignmentRepository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ public class AssignmentService {
     @Autowired
     private AssignmentRepository assignmentRepository;
 
-    public void createAssignment(String project_id, String assignment_text) {
+    public void createAssignment(String project_id, String assignment_title, String assignment_text, List<Map<String, String>> tags) {
         Assignment assignment = new Assignment();
         assignment.setProjectId(project_id);
+        assignment.setAssignmentTitle(assignment_title);
         assignment.setAssignmentText(assignment_text);
+        assignment.setTags(tags);
         assignmentRepository.save(assignment);
     }
 
