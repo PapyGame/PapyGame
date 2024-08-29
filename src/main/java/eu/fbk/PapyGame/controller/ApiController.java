@@ -115,7 +115,9 @@ public class ApiController {
         }
         Assignment assignment = assignmentService.getAssignmentByProjectId(projectId);
         if (assignment != null) {
+            assignment.setAssignmentTitle(assignmentTitle);
             assignment.setAssignmentText(assignmentText);
+            assignment.setTags(tags);
             assignmentService.saveAssignment(assignment);
             return ResponseEntity.ok("Assignment modified successfully");
         } else {
